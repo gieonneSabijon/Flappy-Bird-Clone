@@ -6,27 +6,9 @@ pygame.font.init()
 myfont = pygame.font.SysFont('Comic Sans MS', 30)
 points_text = myfont.render('', False, (0, 0, 0))
 menu_text = myfont.render('', False, (0, 0, 0))
-points = 0
-bird_x = 5
-bird_y = 0
-
-pipe_x = [300, 600, 900]
-pipe_y = [100, 200, 300]
-
-vel = 5
-jump = False
-
-alive = True
-
-bird = pygame.Rect(0, 0, 0, 0)
-top_pipes = []
-bot_pipes = []
-
-for i in range(4):
-    top_pipes.append(pygame.Rect(0,0,0,0))
-    bot_pipes.append(pygame.Rect(0,0,0,0))
 
 def main():
+    setup()
     clock = pygame.time.Clock()
     run = True  
 
@@ -40,6 +22,40 @@ def main():
 
     pygame.quit()
 
+def setup():
+    global bird_y
+    global pipe_x
+    global pipe_y
+    global alive
+    global points
+    global bird_x
+    global jump
+    global vel
+    global bird 
+    global top_pipes
+    global bot_pipes
+
+    points = 0
+    bird_x = 5
+    bird_y = 0
+
+    pipe_x = [600, 900, 1200]
+    pipe_y = [0, 0, 0]
+
+    for pipe in range(len(pipe_y)):
+        pipe_y[pipe] = random.randint(50 , 400)
+    vel = 5
+    jump = False
+
+    alive = True
+
+    bird = pygame.Rect(0, 0, 0, 0)
+    top_pipes = []
+    bot_pipes = []
+    for i in range(len(pipe_x)):
+        top_pipes.append(pygame.Rect(0,0,0,0))
+        bot_pipes.append(pygame.Rect(0,0,0,0))
+
 def draw():
     global menu_text
     if alive:
@@ -51,9 +67,10 @@ def draw():
         WINDOW.blit(points_text,(0,0))
     else:
         menu_text = myfont.render("Game Over", False, (0, 0, 0))
-        WINDOW.fill((214, 21, 11))
         WINDOW.blit(menu_text,(350,225))
         WINDOW.blit(points_text,(0,0))
+        menu_text = myfont.render("Pres Enter to Play Again", False, (0, 0, 0))
+        WINDOW.blit(menu_text,(250,250))
 
     pygame.display.update()
 
@@ -90,6 +107,10 @@ def keyboard_Input():
         alive = False
 
     bird = pygame.Rect(50, bird_y, 50, 50)
+
+    if not alive:
+        if key_pressed[pygame.K_RETURN]:
+            setup()
         
 def pipes():
     global pipe_y
@@ -130,7 +151,6 @@ def point_counter():
     for pipe in pipe_x:
         if pipe == 50 and alive:
             points += 1
-            print(points)
 
 
 if __name__ == "__main__":
