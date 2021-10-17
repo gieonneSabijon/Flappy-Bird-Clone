@@ -2,7 +2,11 @@ import pygame, random
 
 WINDOW = pygame.display.set_mode((900, 500))
 pygame.display.set_caption("Flappy Bird")
-
+pygame.font.init()
+myfont = pygame.font.SysFont('Comic Sans MS', 30)
+points_text = myfont.render('', False, (0, 0, 0))
+menu_text = myfont.render('', False, (0, 0, 0))
+points = 0
 bird_x = 5
 bird_y = 0
 
@@ -37,14 +41,19 @@ def main():
     pygame.quit()
 
 def draw():
+    global menu_text
     if alive:
         WINDOW.fill((99, 153, 214))
         pygame.draw.rect(WINDOW, (240, 234, 58), bird)
         for pipe in range(len(pipe_x)):
             pygame.draw.rect(WINDOW, (9, 145, 34), top_pipes[pipe])
             pygame.draw.rect(WINDOW, (9, 145, 34), bot_pipes[pipe])
+        WINDOW.blit(points_text,(0,0))
     else:
+        menu_text = myfont.render("Game Over", False, (0, 0, 0))
         WINDOW.fill((214, 21, 11))
+        WINDOW.blit(menu_text,(350,225))
+        WINDOW.blit(points_text,(0,0))
 
     pygame.display.update()
 
@@ -53,6 +62,7 @@ def update():
     pipes()
     keyboard_Input()
     collision()
+    point_counter()
 
 def keyboard_Input():
     global bird_y
@@ -98,6 +108,8 @@ def pipes():
         bot_pipes[pipe] = pygame.Rect(pipe_x[pipe], pipe_y[pipe] + 150, 75, 500)
 
 def collision():
+
+
     global top_pipes
     global bot_pipes
     global bird
@@ -106,6 +118,20 @@ def collision():
     for pipe in range(len(pipe_x)):
         if bird.colliderect(top_pipes[pipe]) or bird.colliderect(bot_pipes[pipe]):
             alive = False
+
+def point_counter():
+    global points_text
+    global points
+    global bird_x
+    global pipe_x
+    global alive
+    points_text = myfont.render(str(points), False, (0, 0, 0))
+
+    for pipe in pipe_x:
+        if pipe == 50 and alive:
+            points += 1
+            print(points)
+
 
 if __name__ == "__main__":
     main()
