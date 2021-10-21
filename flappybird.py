@@ -53,11 +53,10 @@ def draw():
     WINDOW.blit(background_image, (0,0))
     WINDOW.blit(grass_image, (grass_x,458))
     WINDOW.blit(flappy_sprite, (50, birdPlayer.get_y()))
-    
 
-    for pipe in range(len(pipez)):
-        WINDOW.blit(top_pipes_image,(pipez[pipe].get_x(), pipez[pipe].get_y() - 500))
-        WINDOW.blit(bot_pipes_image,(pipez[pipe].get_x(), pipez[pipe].get_y() + 150))
+    for pipe in pipez:
+        WINDOW.blit(top_pipes_image,(pipe.get_x(), pipe.get_y() - 500))
+        WINDOW.blit(bot_pipes_image,(pipe.get_x(), pipe.get_y() + 150))
 
     if birdPlayer.get_idle():
         menu_text = myfont.render("Press Space or W to Play", False, (0, 0, 0))
@@ -116,23 +115,26 @@ def player():
         birdPlayer.set_x(5)
         birdPlayer.set_vel(birdPlayer.get_vel() + 1)
     birdPlayer.set_y(birdPlayer.get_y() + birdPlayer.get_vel()) 
+
+    if birdPlayer.get_y() > 600:
+        birdPlayer.set_y(600)
         
 def pipes():
     if birdPlayer.get_alive():
-        for pipe in range(len(pipez)):
-            pipez[pipe].set_x(pipez[pipe].get_x() - birdPlayer.get_x())
+        for pipe in pipez:
+            pipe.set_x(pipe.get_x() - birdPlayer.get_x())
 
-            if pipez[pipe].get_x() <= -75:
-                pipez[pipe].set_x(900)
-                pipez[pipe].set_y(random.randint(50 , 200)) 
+            if pipe.get_x() <= -75:
+                pipe.set_x(900)
+                pipe.set_y(random.randint(50 , 200)) 
 
-            pipez[pipe].set_top_rect(pygame.Rect(pipez[pipe].get_x(), 0, 75, pipez[pipe].get_y()))
-            pipez[pipe].set_bot_rect(pygame.Rect(pipez[pipe].get_x(), pipez[pipe].get_y() + 150, 75, 500))
+            pipe.set_top_rect(pygame.Rect(pipe.get_x(), 0, 75, pipe.get_y()))
+            pipe.set_bot_rect(pygame.Rect(pipe.get_x(), pipe.get_y() + 150, 75, 500))
 
 def collision():
     if birdPlayer.get_alive():
-        for pipe in range(len(pipez)):
-            if birdPlayer.get_rect().colliderect(pipez[pipe].get_top_rect()) or birdPlayer.get_rect().colliderect(pipez[pipe].get_bot_rect()):
+        for pipe in pipez:
+            if birdPlayer.get_rect().colliderect(pipe.get_top_rect()) or birdPlayer.get_rect().colliderect(pipe.get_bot_rect()):
                 birdPlayer.set_vel(-10)
                 birdPlayer.set_alive(False)
 
