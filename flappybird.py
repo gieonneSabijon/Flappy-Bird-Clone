@@ -1,5 +1,6 @@
 from os import truncate
 import pygame, random
+from entities import Player, Pipes
 
 WINDOW = pygame.display.set_mode((900, 500))
 pygame.display.set_caption("Flappy Bird")
@@ -7,11 +8,11 @@ pygame.font.init()
 myfont = pygame.font.SysFont('Comic Sans MS', 30)
 points_text = myfont.render('', False, (0, 0, 0))
 menu_text = myfont.render('', False, (0, 0, 0))
-clock = pygame.time.Clock()
 
 def main():
     setup()
     run = True  
+    clock = pygame.time.Clock()
 
     while run:
         clock.tick(60)
@@ -24,169 +25,125 @@ def main():
     pygame.quit()
 
 def setup():
-    global bird_y
-    global pipe_x
-    global pipe_y
-    global alive
     global points
-    global bird_x
-    global jump
-    global vel
-    global bird 
-    global top_pipes
-    global bot_pipes
-    global idle
     global grass_x
 
-    idle = True
+    global pipez
+    pipez = [Pipes(910,0),Pipes(1210,0),Pipes(1510,0)]
+
+    global birdPlayer
+    birdPlayer = Player(5,200)
+
     grass_x = 0
     points = 0
-    bird_x = 5
-    bird_y = 200
 
-    pipe_x = [910, 1210, 1510]
-    pipe_y = [0, 0, 0]
-
-    for pipe in range(len(pipe_y)):
-        pipe_y[pipe] = random.randint(50 , 200)
-    vel = 0
-    jump = False
-
-    alive = True
-
-    bird = pygame.Rect(0, 0, 0, 0)
-    top_pipes = []
-    bot_pipes = []
-    for i in range(len(pipe_x)):
-        top_pipes.append(pygame.Rect(0,0,0,0))
-        bot_pipes.append(pygame.Rect(0,0,0,0))
+    for pipe in pipez:
+        pipe.set_y(random.randint(50 , 200))
 
 def draw():
     global grass_x
     global menu_text
+
     grass_image = pygame.image.load('grass.png')
     background_image = pygame.image.load('background.png')
     bot_pipes_image = pygame.image.load('bottompipes.png')
     top_pipes_image = pygame.image.load('toppipes.png')
     flappy_sprite = pygame.image.load('flappybird.png')
+
     WINDOW.blit(background_image, (0,0))
     WINDOW.blit(grass_image, (grass_x,458))
-    WINDOW.blit(flappy_sprite, (50, bird_y))
-    for pipe in range(len(pipe_x)):
-        WINDOW.blit(top_pipes_image,(pipe_x[pipe], pipe_y[pipe] - 500))
-        WINDOW.blit(bot_pipes_image,(pipe_x[pipe], pipe_y[pipe] + 150))
-    WINDOW.blit(points_text,(0,0))
-    if idle:
+    WINDOW.blit(flappy_sprite, (50, birdPlayer.get_y()))
+    
+
+    for pipe in range(len(pipez)):
+        WINDOW.blit(top_pipes_image,(pipez[pipe].get_x(), pipez[pipe].get_y() - 500))
+        WINDOW.blit(bot_pipes_image,(pipez[pipe].get_x(), pipez[pipe].get_y() + 150))
+
+    if birdPlayer.get_idle():
         menu_text = myfont.render("Press Space or W to Play", False, (0, 0, 0))
         WINDOW.blit(menu_text,(250,220))
-    if not alive:
-        WINDOW.blit(flappy_sprite, (50, bird_y))
+    WINDOW.blit(points_text,(0,0))
+
+    if not birdPlayer.get_alive():
+        WINDOW.blit(flappy_sprite, (50, birdPlayer.get_y()))
+
         menu_text = myfont.render("Game Over", False, (0, 0, 0))
-        WINDOW.blit(menu_text,(350,225))
-        WINDOW.blit(points_text,(0,0))
+        WINDOW.blit(menu_text,(350,210))
+         
         menu_text = myfont.render("Press Enter to Play Again", False, (0, 0, 0))
         WINDOW.blit(menu_text,(250,250))
+
     else:
         grass_x -= 1
         if grass_x < - 500:
             grass_x = 0 
     
-
     pygame.display.update()
 
 def update():
-
     pipes()
     player()
     collision()
     point_counter()
 
 def player():
-    global bird_y
-    global bird_x
-    global jump
-    global vel
-    global alive
-    global bird
-    global idle
-    bird = pygame.Rect(50, bird_y, 50, 40)
 
+    birdPlayer.set_rect(pygame.Rect(50, birdPlayer.get_y(), 50, 40))
     key_pressed = pygame.key.get_pressed()
-    if alive:
-        if not jump:
+    if birdPlayer.get_alive():
+        if not birdPlayer.get_jump():
             if key_pressed[pygame.K_w] or key_pressed[pygame.K_SPACE]:
-                vel = -13
-                jump = True
-        if vel == 0:
-            jump = False
-        
+                birdPlayer.set_vel(-13)
+                birdPlayer.set_jump(True)
+        if birdPlayer.get_vel() == 0:
+            birdPlayer.set_jump(False)
 
-        if bird_y < 0:
-            bird_y = 0
+        if birdPlayer.get_y() < 0:
+            birdPlayer.set_y(0)
 
-        if bird_y > 500:
-            alive = False
-
-
-
+        if birdPlayer.get_y() > 500:
+            birdPlayer.set_alive(False)
     else:
         if key_pressed[pygame.K_RETURN]:
             setup()
 
-    if idle:
-        bird_x = 0
+    if birdPlayer.get_idle():
+        birdPlayer.set_x(0)
         if key_pressed[pygame.K_w] or key_pressed[pygame.K_SPACE]:
-             idle = False
+            birdPlayer.set_idle(False)
 
     else:
-        bird_x = 5
-        vel += 1
-    bird_y += vel
+        birdPlayer.set_x(5)
+        birdPlayer.set_vel(birdPlayer.get_vel() + 1)
+    birdPlayer.set_y(birdPlayer.get_y() + birdPlayer.get_vel()) 
         
 def pipes():
-    global pipe_y
-    global pipe_x
-    global bird_x
-    global top_pipes
+    if birdPlayer.get_alive():
+        for pipe in range(len(pipez)):
+            pipez[pipe].set_x(pipez[pipe].get_x() - birdPlayer.get_x())
 
-    if alive:
-        for pipe in range(len(pipe_x)):
-            pipe_x[pipe] -= bird_x
+            if pipez[pipe].get_x() <= -75:
+                pipez[pipe].set_x(900)
+                pipez[pipe].set_y(random.randint(50 , 200)) 
 
-            if pipe_x[pipe] <= -75:
-                pipe_x[pipe] = 900
-                pipe_y[pipe] = random.randint(50 , 200)
-
-            top_pipes[pipe] = pygame.Rect(pipe_x[pipe], 0, 75, pipe_y[pipe])
-            bot_pipes[pipe] = pygame.Rect(pipe_x[pipe], pipe_y[pipe] + 150, 75, 500)
+            pipez[pipe].set_top_rect(pygame.Rect(pipez[pipe].get_x(), 0, 75, pipez[pipe].get_y()))
+            pipez[pipe].set_bot_rect(pygame.Rect(pipez[pipe].get_x(), pipez[pipe].get_y() + 150, 75, 500))
 
 def collision():
-
-
-    global top_pipes
-    global bot_pipes
-    global bird
-    global alive
-    global vel
-
-    if alive:
-        for pipe in range(len(pipe_x)):
-            if bird.colliderect(top_pipes[pipe]) or bird.colliderect(bot_pipes[pipe]):
-                vel = -10
-                alive = False
+    if birdPlayer.get_alive():
+        for pipe in range(len(pipez)):
+            if birdPlayer.get_rect().colliderect(pipez[pipe].get_top_rect()) or birdPlayer.get_rect().colliderect(pipez[pipe].get_bot_rect()):
+                birdPlayer.set_vel(-10)
+                birdPlayer.set_alive(False)
 
 def point_counter():
     global points_text
     global points
-    global bird_x
-    global pipe_x
-    global alive
     points_text = myfont.render(str(points), False, (0, 0, 0))
 
-    for pipe in pipe_x:
-        if pipe == 50 and alive:
+    for pipe in pipez:
+        if pipe == 50 and birdPlayer.get_alive():
             points += 1
-
 
 if __name__ == "__main__":
     main()
