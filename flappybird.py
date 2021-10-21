@@ -142,7 +142,7 @@ def point_counter():
     points_text = myfont.render(str(points), False, (0, 0, 0))
 
     for pipe in pipez:
-        if pipe == 50 and birdPlayer.get_alive():
+        if pipe.get_x() == 50 and birdPlayer.get_alive():
             points += 1
 
 if __name__ == "__main__":
